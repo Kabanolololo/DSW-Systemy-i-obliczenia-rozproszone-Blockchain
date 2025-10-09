@@ -4,11 +4,12 @@ import datetime
 
 # Klasa Blok
 class Block:
-    def __init__(self, index, date, data, previous_hash):
+    def __init__(self, index, date, data, previous_hash, nonce=0):
         self.index = index
         self.date = date
         self.data = data
         self.previous_hash = previous_hash
+        self.nonce = nonce
         self.hash = self.calculate_hash()
 
     # Metoda tworzaca hash
@@ -17,11 +18,19 @@ class Block:
             'index': self.index,
             'date': self.date,
             'data': self.data,
-            'previous_hash': self.previous_hash
+            'previous_hash': self.previous_hash,
+            'nonce': self.nonce
         }
         json_data = json.dumps(block_content, sort_keys=True)
         created_hash = hashlib.sha256(json_data.encode())
         return created_hash.hexdigest()
+
+    # Metoda kopania bloków
+    def mine_block(self, difficulty):
+        target = "0" * int(difficulty)
+        while not self.hash.startswith(target):
+            self.nonce += 1
+            self.hash = self.calculate_hash()
 
 # Klasa Blokchain
 class Blockchain:
@@ -38,7 +47,7 @@ class Blockchain:
         return self.blocks[-1]
 
     # Metoda do dodawnia bloku
-    def add_block(self, data):
+    def add_block(self, data, difficulty = 8):
         previous_block = self.get_previous_block()
 
         new_index = previous_block.index + 1
@@ -46,6 +55,7 @@ class Blockchain:
         previous_hash = previous_block.hash
 
         block = Block(new_index, new_date, data, previous_hash)
+        block.mine_block(difficulty)
         self.blocks.append(block)
 
     # Metoda do walidacji hashy
