@@ -48,6 +48,20 @@ class Blockchain:
         block = Block(new_index, new_date, data, previous_hash)
         self.blocks.append(block)
 
+    # Metoda do walidacji hashy
+    def is_chain_valid(self):
+        for x in range(1, len(self.blocks)):
+            previous_hash = self.blocks[x].previous_hash
+            previous_block_hash = self.blocks[x - 1].hash
+
+            if previous_hash != previous_block_hash:
+                print(f"Blok {x} ma invalid hash poprzedniego bloku!")
+                return False
+
+        print("Hashes are valid.")
+        return True
+
+
 # Inicjalizacja blockchaina
 my_blockchain = Blockchain()
 
@@ -67,3 +81,6 @@ for block in my_blockchain.blocks:
     print(f"Previous Hash: {block.previous_hash}")
     print(f"Hash: {block.hash}")
     print("-" * 30)
+
+# Walidacja bloków
+my_blockchain.is_chain_valid()
