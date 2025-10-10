@@ -1,0 +1,20 @@
+✅ Zadanie 6: Prosty system transakcji
+Cel: Zmienna data w bloku powinna zawierać listę transakcji (np. słowniki z sender,
+receiver, amount).
+ Dodaj bufor oczekujących transakcji.
+ Dodaj metodę add_transaction.
+ Nowy blok powinien zawierać transakcje z bufora.
+
+
+
+
+✅ Zadanie 7: Weryfikacja
+Cel: Weryfikacja bezpieczeństwa blockchain
+ Zmień transakcję w dowolnym bloku
+ Wykonaj funkcję weryfikującą długość blockchain
+o Wykonaj funkcję weryfikującą każdy block w blockchain
+- poprawność hasha (block.hash == block.calculate_hash()),
+o czy block.previous_hash == previous_block.hash,
+o poprawność nonce, jeśli używany jest proof-of-work.
+ Dodaj raport błędów: is_chain_valid() powinno zwracać nie tylko True/False, ale
+i listę wykrytych błędów.
