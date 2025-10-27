@@ -93,14 +93,65 @@ def sign_message(private_key_hex, message):
     
     return signature_hex
 
+# funkcja weryfikujaca podpis publicznym kluczem
+def verify_signature(public_key_hex, message, signature_hex):
+    
+    # konwersja public key z hex na bytes
+    public_key_bytes = bytes.fromhex(public_key_hex)
+
+    # jesli compressed (33 bajty), rozpakowujemy do x||y (64 bajty)
+    if len(public_key_bytes) == 33:
+        prefix = public_key_bytes[0]
+        x_bytes = public_key_bytes[1:]
+        x = int.from_bytes(x_bytes, 'big')
+
+        # secp256k1 prime
+        p = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
+
+        # obliczamy y^2 = x^3 + 7 mod p
+        y2 = (pow(x, 3, p) + 7) % p
+        y = pow(y2, (p + 1)//4, p)
+
+        # wybieramy y o odpowiedniej parzystosci (prefix)
+        if (y % 2 == 0 and prefix == 3) or (y % 2 == 1 and prefix == 2):
+            y = p - y
+
+        y_bytes = y.to_bytes(32, 'big')
+        uncompressed_pubkey_bytes = x_bytes + y_bytes  # 64 bajty
+    elif len(public_key_bytes) == 64:
+        uncompressed_pubkey_bytes = public_key_bytes
+    else:
+        raise ValueError("Nieprawidlowy format klucza publicznego")
+
+    # tworzymy VerifyingKey z surowych wspolrzednych x||y
+    verify_key = ecdsa.VerifyingKey.from_string(uncompressed_pubkey_bytes, curve=ecdsa.SECP256k1)
+
+    # hashujemy wiadomosc SHA-256
+    message_bytes = message.encode()
+    message_hash = hashlib.sha256(message_bytes).digest()
+
+    # konwersja podpisu z hex na bytes
+    signature_bytes = bytes.fromhex(signature_hex)
+
+    # weryfikacja podpisu
+    try:
+        valid = verify_key.verify_digest(signature_bytes, message_hash)
+        return valid
+    except ecdsa.BadSignatureError:
+        return False
 
 if __name__ == "__main__":
     wallet = create_wallet()
     print("Wygenerowany wallet:", wallet)
     private_key = wallet["private_key"]
+    public_key = wallet["public_key"]
 
     message = "Przelew 1 BTC do Alice"
 
-    # podpisanie wiadomości
+    # podpisanie
     signature = sign_message(private_key, message)
-    print("Podpis (hex):", signature)
+    print("Podpis wiadomości:", signature)
+    
+    # weryfikacja podpisu
+    is_valid = verify_signature(public_key, message, signature)
+    print("Czy podpis jest poprawny?", is_valid)
