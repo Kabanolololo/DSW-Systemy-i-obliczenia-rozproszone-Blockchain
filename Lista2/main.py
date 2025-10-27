@@ -99,7 +99,7 @@ def verify_signature(public_key_hex, message, signature_hex):
     # konwersja public key z hex na bytes
     public_key_bytes = bytes.fromhex(public_key_hex)
 
-    # jesli compressed (33 bajty), rozpakowujemy do x||y (64 bajty)
+    # jesli 33 bajty, rozpakowujemy do 64 bajty
     if len(public_key_bytes) == 33:
         prefix = public_key_bytes[0]
         x_bytes = public_key_bytes[1:]
@@ -112,7 +112,7 @@ def verify_signature(public_key_hex, message, signature_hex):
         y2 = (pow(x, 3, p) + 7) % p
         y = pow(y2, (p + 1)//4, p)
 
-        # wybieramy y o odpowiedniej parzystosci (prefix)
+        # wybieramy y o dobrej parzystosci
         if (y % 2 == 0 and prefix == 3) or (y % 2 == 1 and prefix == 2):
             y = p - y
 
@@ -123,7 +123,7 @@ def verify_signature(public_key_hex, message, signature_hex):
     else:
         raise ValueError("Nieprawidlowy format klucza publicznego")
 
-    # tworzymy VerifyingKey z surowych wspolrzednych x||y
+    # tworzymy verifyingkey z surowych wspolrzednych xy
     verify_key = ecdsa.VerifyingKey.from_string(uncompressed_pubkey_bytes, curve=ecdsa.SECP256k1)
 
     # hashujemy wiadomosc SHA-256
@@ -140,18 +140,41 @@ def verify_signature(public_key_hex, message, signature_hex):
     except ecdsa.BadSignatureError:
         return False
 
+# funkcja do tworzenia transakcji
+def create_transaction(sender_wallet, recipient_address, amount):
+
+    # tworzymy wiadomosc transakcji jako string
+    message = f"{sender_wallet['address']}->{recipient_address}:{amount}"
+
+    # podpisujemy wiadomosc prywatnym kluczem nadawcy
+    signature = sign_message(sender_wallet['private_key'], message)
+
+    # tworzymy slownik transakcji
+    transaction = {
+        "sender": sender_wallet['address'],
+        "recipient": recipient_address,
+        "amount": amount,
+        "signature": signature
+    }
+
+    return transaction
+
 if __name__ == "__main__":
-    wallet = create_wallet()
-    print("Wygenerowany wallet:", wallet)
-    private_key = wallet["private_key"]
-    public_key = wallet["public_key"]
+    sender_wallet = create_wallet()
+    print("Wygenerowany wallet:", sender_wallet)
+
+    private_key = sender_wallet["private_key"]
+    public_key = sender_wallet["public_key"]
 
     message = "Przelew 1 BTC do Alice"
-
-    # podpisanie
     signature = sign_message(private_key, message)
     print("Podpis wiadomości:", signature)
-    
-    # weryfikacja podpisu
+
     is_valid = verify_signature(public_key, message, signature)
     print("Czy podpis jest poprawny?", is_valid)
+
+    recipient_address = "1RecipientBitcoinAddressXYZ"
+    amount = 0.5
+
+    tx = create_transaction(sender_wallet, recipient_address, amount)
+    print("Transakcja:", tx)
