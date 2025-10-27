@@ -2,6 +2,7 @@ import os
 import ecdsa 
 import hashlib
 
+# funkcja do stworzenia portfela
 def create_wallet():
 
     # generowanie klucza prywatnego
@@ -71,6 +72,35 @@ def create_wallet():
         "address": address
     }
 
-# wywolanie funkcji
-wallet = create_wallet()
-print(wallet)
+# funkcja do podpisywania i weryfikacji wiadomosci
+def sign_message(private_key_hex, message):
+    
+    # konwersja klucza prywatnego z hexa na bytes
+    private_key_bytes = bytes.fromhex(private_key_hex)
+    
+    # tworzenie klucza na krzywej
+    sign_key = ecdsa.SigningKey.from_string(private_key_bytes, curve=ecdsa.SECP256k1)
+    
+    # hashowanie wiadomosci 
+    message_bytes = message.encode('utf-8')
+    message_hash = hashlib.sha256(message_bytes).digest()
+    
+    # podpis ECDSA
+    signature = sign_key.sign_digest(message_hash)
+    
+    # konwersja podpisu na hex
+    signature_hex = signature.hex()
+    
+    return signature_hex
+
+
+if __name__ == "__main__":
+    wallet = create_wallet()
+    print("Wygenerowany wallet:", wallet)
+    private_key = wallet["private_key"]
+
+    message = "Przelew 1 BTC do Alice"
+
+    # podpisanie wiadomości
+    signature = sign_message(private_key, message)
+    print("Podpis (hex):", signature)
