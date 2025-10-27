@@ -1,6 +1,7 @@
 import os
 import ecdsa 
 import hashlib
+import json
 
 # funkcja do stworzenia portfela
 def create_wallet():
@@ -159,22 +160,85 @@ def create_transaction(sender_wallet, recipient_address, amount):
 
     return transaction
 
+# funkcja dodajaca transakcje do "blockchaina"
+def add_transaction_to_blockchain(transaction):
+    # przypisanie unikalnego ID (liczba kolejna)
+    tx_id = len(blockchain) + 1
+    transaction_block = {
+        "id": tx_id,
+        "sender": transaction["sender"],
+        "recipient": transaction["recipient"],
+        "amount": transaction["amount"],
+        "signature": transaction["signature"]
+    }
+    blockchain.append(transaction_block)
+    return transaction_block
+
+# funkcja zapisujaca blockchain do pliku JSON
+def save_blockchain_to_file(filename="blockchain.json"):
+    with open(filename, "w") as f:
+        json.dump(blockchain, f, indent=4)
+
+# funkcja wczytujaca blockchain z pliku JSON
+def load_blockchain_from_file(filename="blockchain.json"):
+    global blockchain
+    try:
+        with open(filename, "r") as f:
+            blockchain = json.load(f)
+    except FileNotFoundError:
+        blockchain = []
+        
+        
 if __name__ == "__main__":
-    sender_wallet = create_wallet()
-    print("Wygenerowany wallet:", sender_wallet)
+    import json
 
-    private_key = sender_wallet["private_key"]
-    public_key = sender_wallet["public_key"]
+    # lista symulujaca blockchain
+    blockchain = []
 
-    message = "Przelew 1 BTC do Alice"
-    signature = sign_message(private_key, message)
-    print("Podpis wiadomości:", signature)
+    # generujemy portfele nadawcow
+    sender_wallet1 = create_wallet()
+    sender_wallet2 = create_wallet()
+    print("Wygenerowane portfele:")
+    print("Wallet 1:", sender_wallet1)
+    print("Wallet 2:", sender_wallet2)
 
-    is_valid = verify_signature(public_key, message, signature)
-    print("Czy podpis jest poprawny?", is_valid)
+    # lista przykładowych transakcji do dodania
+    transactions_info = [
+        {"sender_wallet": sender_wallet1, "recipient": "1RecipientAddressA", "amount": 0.5},
+        {"sender_wallet": sender_wallet1, "recipient": "1RecipientAddressB", "amount": 1.2},
+        {"sender_wallet": sender_wallet2, "recipient": "1RecipientAddressC", "amount": 2.0},
+        {"sender_wallet": sender_wallet2, "recipient": "1RecipientAddressD", "amount": 0.75},
+    ]
 
-    recipient_address = "1RecipientBitcoinAddressXYZ"
-    amount = 0.5
+    # tworzymy i dodajemy transakcje do blockchaina
+    for info in transactions_info:
+        # tworzymy transakcje
+        tx = create_transaction(info["sender_wallet"], info["recipient"], info["amount"])
+        
+        # podpisujemy wiadomość dla tej transakcji
+        message = f"{tx['sender']}->{tx['recipient']}:{tx['amount']}"
+        signature = sign_message(info["sender_wallet"]["private_key"], message)
+        tx["signature"] = signature
 
-    tx = create_transaction(sender_wallet, recipient_address, amount)
-    print("Transakcja:", tx)
+        # weryfikacja podpisu
+        valid = verify_signature(info["sender_wallet"]["public_key"], message, signature)
+        print(f"Transakcja {len(blockchain)+1}, podpis poprawny?", valid)
+
+        # dodanie do blockchaina z unikalnym ID
+        tx_block = {
+            "id": len(blockchain) + 1,
+            "sender": tx["sender"],
+            "recipient": tx["recipient"],
+            "amount": tx["amount"],
+            "signature": tx["signature"]
+        }
+        blockchain.append(tx_block)
+        print(f"Dodano transakcje do blockchaina: {tx_block}")
+
+    # zapis blockchaina do pliku JSON
+    with open("blockchain.json", "w") as f:
+        json.dump(blockchain, f, indent=4)
+    print("Blockchain zapisany do pliku blockchain.json")
+
+    # wyswietlenie calego blockchaina
+    print("Aktualny blockchain:", blockchain)
