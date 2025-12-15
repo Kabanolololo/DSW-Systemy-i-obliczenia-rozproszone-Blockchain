@@ -9,4 +9,5 @@ Każda lista zawierać będzie zestaw zadań praktycznych, które będą **oceni
 
 - `Lista1/` – pierwsza lista zadań  
 - `Lista2/` – druga lista zadań  
-- `Lista3/` – kolejne zadania itd.
+- `Lista3/` – trzecia lista zadań
+- `Lista4/` – czwarta lista zadań
