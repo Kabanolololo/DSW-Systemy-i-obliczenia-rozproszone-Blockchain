@@ -1,0 +1,49 @@
+Zadania z optymalizacji kosztów w Solidity (bez podpowiedzi)
+1. Optymalizacja struktury przechowywania użytkowników
+
+Zaprojektuj kontrakt zarządzający listą użytkowników, tak aby dodawanie i sprawdzanie istnienia użytkownika było jak najtańsze.
+
+2. Zminimalizuj koszty przechowywania krótkich tekstów
+
+W kontrakcie przechowywane są krótkie kody takie jak "OK" i "ERR".
+Zoptymalizuj ich zapis i odczyt, aby zużycie gazu było minimalne.
+
+3. Ogranicz liczbę zapisów do storage
+
+W funkcji licznik jest inkrementowany trzykrotnie.
+Przepisz logikę tak, aby wykonać jak najmniej operacji na storage.
+
+4. Optymalizacja typów funkcji
+
+Dany jest kontrakt z wieloma funkcjami oznaczonymi jako public.
+Przepisz go tak, aby funkcje były jak najtańsze w wywołaniu spoza kontraktu.
+
+5. Optymalizacja pętli iterującej po tablicy
+
+Masz funkcję sumującą wartości tablicy.
+Zoptymalizuj jej implementację tak, aby zużywała jak najmniej gazu.
+
+6. Optymalizacja rozmieszczenia zmiennych w storage
+
+W kontrakcie znajdują się zmienne o różnych rozmiarach, np. uint128, uint256, uint128.
+Zoptymalizuj ich ułożenie tak, aby zajmowały jak najmniej slotów storage.
+
+7. Minimalizacja kosztów komunikatów błędów
+
+W wielu funkcjach używane są długie komunikaty require.
+Zoptymalizuj je, aby zmniejszyć zużycie gazu.
+
+8. Redukcja liczby eventów
+
+W kontrakcie emitowane są eventy po każdej zmianie stanu.
+Przepisz kontrakt tak, aby eventy były emitowane tylko tam, gdzie to konieczne.
+
+9. Optymalizacja kodu konstruktora
+
+W kontrakcie konstruktor wykonuje rozbudowaną logikę inicjalizacyjną.
+Zmień implementację tak, aby obniżyć koszt deployu.
+
+10. Eliminacja zbędnych modyfikatorów
+
+Kontrakt używa modyfikatorów dostępowych w wielu funkcjach, także w takich, które nie wymagają ich zastosowania.
+Usuń je tam, gdzie nie są potrzebne, optymalizując koszt wywołań.
